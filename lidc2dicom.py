@@ -358,7 +358,7 @@ class LIDC2DICOMConverter:
 
       segMetadata["ContentDescription"] = "Lung nodule segmentation - all"
       segMetadata["SeriesDescription"] = "Segmentations of all nodules"
-      segMetadata["SeriesNumber"] = str(int(ctDCM.SeriesNumber)+self.instanceCount)
+      segMetadata["SeriesNumber"] = str(int(ctDCM.SeriesNumber if ctDCM.SeriesNumber else 0)+self.instanceCount)
       self.instanceCount = self.instanceCount+1
 
       # run SEG converter
