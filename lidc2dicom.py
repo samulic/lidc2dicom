@@ -74,7 +74,7 @@ class LIDC2DICOMConverter:
     segJSON["SeriesDescription"] = "Segmentation of "+segName
 
     self.instanceCount = self.instanceCount+1
-    if ctDCM.SeriesNumber != '':
+    if ctDCM.SeriesNumber:
       segJSON["SeriesNumber"] = str(int(ctDCM.SeriesNumber)+self.instanceCount)
     else:
       segJSON["SeriesNumber"] = str(self.instanceCount)
@@ -123,7 +123,7 @@ class LIDC2DICOMConverter:
     srJSON["observerContext"]["PersonObserverName"] = "anonymous"
 
     self.instanceCount = self.instanceCount+1
-    if ctDCM.SeriesNumber != '':
+    if ctDCM.SeriesNumber:
       srJSON["SeriesNumber"] = str(int(ctDCM.SeriesNumber)+self.instanceCount)
     else:
       srJSON["SeriesNumber"] = str(self.instanceCount)
@@ -396,7 +396,7 @@ class LIDC2DICOMConverter:
 
       srMetadata["ContentDescription"] = "Lung nodule measurements - all"
       srMetadata["SeriesDescription"] = "Evaluations for all nodules"
-      srMetadata["SeriesNumber"] = str(int(ctDCM.SeriesNumber)+self.instanceCount)
+      srMetadata["SeriesNumber"] = str(int(ctDCM.SeriesNumber if ctDCM.SeriesNumber else 0)+self.instanceCount)
       self.instanceCount = self.instanceCount+1
 
       allSrsJSON = os.path.join(subjectScanTempDir, "all_measurements.json")
