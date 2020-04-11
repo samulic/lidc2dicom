@@ -94,13 +94,16 @@ class LIDC2DICOMConverter:
     converterCmd = ['itkimage2segimage', "--inputImageList", nrrdSegFile, "--inputDICOMDirectory", seriesDir, "--inputMetadata", jsonSegFile, "--outputDICOM", dcmSegFile]
     if self.args.skip:
       converterCmd.append('--skip')
-    self.logger.info("Converting to DICOM SEG with "+str(converterCmd))
+    if not os.path.exists(dcmSegFile):
 
-    sp = subprocess.Popen(converterCmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    (stdout, stderr) = sp.communicate()
-    self.logger.info("itkimage2segimage stdout: "+stdout.decode('ascii'))
-    self.logger.warning("itkimage2segimage stderr: "+stderr.decode('ascii'))
+      self.logger.info("Converting to DICOM SEG with "+str(converterCmd))
 
+      sp = subprocess.Popen(converterCmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      (stdout, stderr) = sp.communicate()
+      self.logger.info("itkimage2segimage stdout: "+stdout.decode('ascii'))
+      self.logger.warning("itkimage2segimage stderr: "+stderr.decode('ascii'))
+    else:
+      self.logger.info(f'Dicom SEG file {dcmSegFile} already exists, not rerunning')
     segUID = None
     ctSeriesUID = None
     try:
@@ -184,13 +187,17 @@ class LIDC2DICOMConverter:
       json.dump(srJSON, f, indent=2)
 
     dcmSRFile = os.path.join(self.tempSubjectDir,srName+'.dcm')
-    converterCmd = ['tid1500writer', "--inputMetadata", jsonSRFile, "--inputImageLibraryDirectory", seriesDir, "--inputCompositeContextDirectory", self.tempSubjectDir, "--outputDICOM", dcmSRFile]
-    self.logger.info("Converting with "+str(converterCmd))
+    if not os.path.exists(dcmSRFile):
+      converterCmd = ['tid1500writer', "--inputMetadata", jsonSRFile, "--inputImageLibraryDirectory", seriesDir, "--inputCompositeContextDirectory", self.tempSubjectDir, "--outputDICOM", dcmSRFile]
+      self.logger.info("Converting with "+str(converterCmd))
 
-    sp = subprocess.Popen(converterCmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    (stdout, stderr) = sp.communicate()
-    self.logger.info("tid1500writer stdout: "+stdout.decode('ascii'))
-    self.logger.warning("tid1500writer stderr: "+stderr.decode('ascii'))
+      sp = subprocess.Popen(converterCmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      (stdout, stderr) = sp.communicate()
+      self.logger.info("tid1500writer stdout: "+stdout.decode('ascii'))
+      self.logger.warning("tid1500writer stderr: "+stderr.decode('ascii'))
+    else:
+      self.logger.info(f'SR file {dcmSRFile} exists, not rerunning')
+
 
     if not os.path.exists(dcmSRFile):
       self.logger.error("Failed to access output SR file for "+s)
@@ -373,12 +380,14 @@ class LIDC2DICOMConverter:
       converterCmd = ['itkimage2segimage', "--inputImageList", nrrdSegFileList, "--inputDICOMDirectory", seriesDir, "--inputMetadata", allSegsJSON, "--outputDICOM", compositeSEGFileName]
       if self.args.skip:
         converterCmd.append('--skip')
-      self.logger.info("Converting to DICOM SEG with "+str(converterCmd))
-
-      sp = subprocess.Popen(converterCmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      (stdout, stderr) = sp.communicate()
-      self.logger.info("itkimage2segimage stdout: "+stdout.decode('ascii'))
-      self.logger.warning("itkimage2segimage stderr: "+stderr.decode('ascii'))
+      if not os.path.exists(compositeSEGFileName):
+        self.logger.info("Converting to DICOM SEG with "+str(converterCmd))
+        sp = subprocess.Popen(converterCmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        (stdout, stderr) = sp.communicate()
+        self.logger.info("itkimage2segimage stdout: "+stdout.decode('ascii'))
+        self.logger.warning("itkimage2segimage stderr: "+stderr.decode('ascii'))
+      else:
+        self.logger.info(f'Composite segmentation {compositeSEGFileName} exists, not rerunning')
 
       if not os.path.exists(compositeSEGFileName):
         self.logger.error("Failed to access output composite SEG file for "+s)
@@ -406,13 +415,15 @@ class LIDC2DICOMConverter:
       compositeSRFileName = os.path.join(subjectScanTempDir,"all_measurements.dcm")
       nrrdSegFileList = nrrdSegFileList[:-1]
 
-      converterCmd = ['tid1500writer', "--inputMetadata", allSrsJSON, "--inputImageLibraryDirectory", seriesDir, "--inputCompositeContextDirectory", subjectScanTempDir, "--outputDICOM", compositeSRFileName]
-      self.logger.info("Converting to DICOM SR with "+str(converterCmd))
-
-      sp = subprocess.Popen(converterCmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      (stdout, stderr) = sp.communicate()
-      self.logger.info("tid1500writer stdout: "+stdout.decode('ascii'))
-      self.logger.warning("tid1500writer stderr: "+stderr.decode('ascii'))
+      if not os.path.exists(compositeSRFileName):
+        converterCmd = ['tid1500writer', "--inputMetadata", allSrsJSON, "--inputImageLibraryDirectory", seriesDir, "--inputCompositeContextDirectory", subjectScanTempDir, "--outputDICOM", compositeSRFileName]
+        self.logger.info("Converting to DICOM SR with "+str(converterCmd))
+        sp = subprocess.Popen(converterCmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        (stdout, stderr) = sp.communicate()
+        self.logger.info("tid1500writer stdout: "+stdout.decode('ascii'))
+        self.logger.warning("tid1500writer stderr: "+stderr.decode('ascii'))
+      else:
+        self.logger.info(f'SR composite file {compositeSRFileName} already exists, not rerunning')
 
       if not os.path.exists(compositeSRFileName):
         self.logger.error("Failed to access output composite SR file for "+s)
