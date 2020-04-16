@@ -249,7 +249,7 @@ class LIDC2DICOMConverter:
             # We have one nrrd more than dicoms because of the complete scan (i.e. '*_CT.nrrd' file)
             if len(converted_dcmFiles) != 0 and len(converted_dcmFiles) == (len(converted_nrrdFiles) - 1)*2:
                 self.logger.info(
-                    f'{self.tempSubjectDir} already converted, not re-running')
+                    f'{s} already converted, not re-running')
                 continue
 
             dcmFiles = glob.glob(os.path.join(seriesDir, "*.dcm"))
