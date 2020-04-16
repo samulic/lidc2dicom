@@ -276,9 +276,12 @@ class LIDC2DICOMConverter:
           clusteredAnnotationIDs.append(a.id)
 
           annotationFileName = "Nodule "+str(nCount+1) +" - Annotation " + a._nodule_id+'.nrrd'
-          self.saveAnnotationAsNRRD(a, volume, os.path.join(self.tempSubjectDir,annotationFileName))
+          if not os.path.exists(os.path.join(self.tempSubjectDir,annotationFileName)):
+            self.saveAnnotationAsNRRD(a, volume, os.path.join(self.tempSubjectDir,annotationFileName))
 
-          self.convertSingleAnnotation(nCount, aCount, a, ctDCM, noduleUID, volume, seriesDir)
+            self.convertSingleAnnotation(nCount, aCount, a, ctDCM, noduleUID, volume, seriesDir)
+          else:
+            self.logger(f'{annotationFileName} exists, not re-running')
 
 
       if len(clusteredAnnotationIDs) != len(anns):
